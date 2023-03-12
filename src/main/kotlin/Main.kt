@@ -1,6 +1,7 @@
 // snippet-start:[s3.kotlin.create_bucket.import]
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.CreateBucketRequest
+import aws.sdk.kotlin.services.s3.model.DeleteBucketRequest
 //import kotlin.system.exitProcess
 // snippet-end:[s3.kotlin.create_bucket.import]
 
@@ -24,8 +25,8 @@ suspend fun main(args: Array<String>) {
 //        exitProcess(0)
 //    }
 //    val bucketName = args[0]
-    val bucketName = "test417"
-    createNewBucket(bucketName)
+    val bucketName = "test412"
+    deleteExistingBucket(bucketName)
 }
 
 // snippet-start:[s3.kotlin.create_bucket.main]
@@ -40,3 +41,18 @@ suspend fun createNewBucket(bucketName: String) {
         println("$bucketName is ready")
     }
 }
+// snippet-end:[s3.kotlin.create_bucket.main]
+
+
+// snippet-start:[s3.kotlin.del_bucket.main]
+suspend fun deleteExistingBucket(bucketName: String?) {
+
+    val request = DeleteBucketRequest {
+        bucket = bucketName
+    }
+    S3Client { region = "us-east-1" }.use { s3 ->
+        s3.deleteBucket(request)
+        println("The $bucketName was successfully deleted!")
+    }
+}
+// snippet-end:[s3.kotlin.del_bucket.main]
