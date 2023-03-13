@@ -20,57 +20,6 @@ object ZipManager {
         }
         return outputZipFile
     }
-//    fun zip(files: List<File>, zipFile: File) {
-//        ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use { output ->
-//            files.forEach { file ->
-//                (file.length() > 1).ifTrue {
-//                    FileInputStream(file).use { input ->
-//                        BufferedInputStream(input).use { origin ->
-//                            val entry = ZipEntry(file.name.toRealName())
-//                            output.putNextEntry(entry)
-//                            origin.copyTo(output, 1024)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-//    //If we do not set encoding as "ISO-8859-1", European characters will be replaced with '?'.
-//    fun unzip(files: List<File>, zipFile: ZipFile) {
-//        zipFile.use { zip ->
-//            zip.entries().asSequence().forEach { entry ->
-//                zip.getInputStream(entry).use { input ->
-//                    BufferedReader(InputStreamReader(input, "ISO-8859-1")).use { reader ->
-//                        files.find { it.name.contains(entry.name) }?.run {
-//                            BufferedWriter(FileWriter(this)).use { writer ->
-//                                var line: String? = null
-//                                while ({ line = reader.readLine(); line }() != null) {
-//                                    writer.append(line).append('\n')
-//                                }
-//                                writer.flush()
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-//    fun unzipFolder(inputZipFile: ZipFile, outputDirectory: File): File {
-//        inputZipFile.use {
-//                zos ->
-//            inputDirectory.walkTopDown().forEach { file ->
-//                val zipFileName = file.absolutePath.removePrefix(inputDirectory.absolutePath).removePrefix("/")
-//                val entry = ZipEntry( "$zipFileName${(if (file.isDirectory) "/" else "" )}")
-//                zos.putNextEntry(entry)
-//                if (file.isFile) {
-//                    file.inputStream().use { fis -> fis.copyTo(zos) }
-//                }
-//            }
-//        }
-//        return outputZipFile
-//    }
 
     /**
      * @param zipFilePath
