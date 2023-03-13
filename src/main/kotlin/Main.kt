@@ -2,34 +2,57 @@
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import java.io.File
+import kotlin.system.exitProcess
 
-
-//import kotlin.system.exitProcess
 // snippet-end:[s3.kotlin.create_bucket.import]
 
-
-class MyArgs(parser: ArgParser) {
-    val verbose by parser.flagging(
-        "-v", "--verbose",
-        help = "enable verbose mode").default("verbose")
-
-    val name by parser.storing(
-        "-N", "--name",
-        help = "name of the user").default("John Doe")
-
-    val count by parser.storing(
-        "-c", "--count",
-        help = "number of widgets") { toInt() }.default("1")
-
-    val source by parser.positional(
-        "SOURCE",
-        help = "source filename").default("file/")
-
-    val destination by parser.positional(
-        "DEST",
-        help = "destination filename").default("new_file/")
+//restore --out-dir abc --bucket abc --key abc
+//
+//restore-file --out abc --bucket abc --key abc
+//
+//delete-backup --bucket abc --key abc
+//
+//delete-bucket --bucket abc
+class ArgsListBucket(parser: ArgParser) {
+    val bucket by parser.storing(
+        "-b", "--bucket",
+        help = "bucket name"
+    ).default(Defaults.DEFAULT_BUCKET)
 }
 
+class ArgsStore(parser: ArgParser) {
+    val bucket by parser.storing(
+        "-b", "--bucket",
+        help = "bucket name"
+    ).default(Defaults.DEFAULT_BUCKET)
+
+    val inDir by parser.storing(
+        "-i", "--in-dir",
+        help = "path to the storing directory"
+    )
+
+    val key by parser.storing(
+        "-k", "--key",
+        help = "name of the backup file in S3"
+    )
+}
+
+class ArgsRestore(parser: ArgParser) {
+    val bucket by parser.storing(
+        "-b", "--bucket",
+        help = "bucket name"
+    ).default(Defaults.DEFAULT_BUCKET)
+
+    val outDir by parser.storing(
+        "-o", "--out-dir",
+        help = "path to the restoring directory"
+    )
+
+    val key by parser.storing(
+        "-k", "--key",
+        help = "name of the backup file in S3"
+    )
+}
 
 /**
 Before running this Kotlin code example, set up your development environment,
@@ -37,12 +60,8 @@ including your credentials.
 For more information, see the following documentation topic:
 https://docs.aws.amazon.com/sdk-for-kotlin/latest/developer-guide/setup.html
  */
-suspend fun main(args: Array<String>) {
-    ArgParser(args).parseInto(::MyArgs).run {
-        println("Hello, ${name}!")
-        println("I'm going to move ${count} widgets from ${source} to ${destination}.")
-        // TODO: move widgets
-    }
+fun main(args: Array<String>) {
+//    println("args: ${args.joinToString(", ")}")
 
     val usage = """
     Usage:
@@ -51,11 +70,45 @@ suspend fun main(args: Array<String>) {
         bucketName - The name of the Amazon S3 bucket to create. The Amazon S3 bucket name must be unique, or an error occurs.
     """
 
-//    if (args.size != 1) {
-//        println(usage)
-//        exitProcess(0)
-//    }
-//    val bucketName = args[0]
+    if (args.isEmpty()) {
+        println(usage)
+        exitProcess(-1)
+    }
+    val command = args[0]
+    val commandArgs = args.drop(1).toTypedArray()
+    when (command) {
+        "list-bucket" -> {
+            val arguments = ArgParser(commandArgs).parseInto(::ArgsListBucket)
+            S3Interaction.listBucketObjects(bucketName = arguments.bucket)
+        }
+
+        "store" -> {
+            val arguments = ArgParser(commandArgs).parseInto(::ArgsStore)
+            val zipFile = ZipManager.zipFolderIntoTmp(File(arguments.inDir))  // TODO close files
+            S3Interaction.putS3Object(
+                bucketName = arguments.bucket,
+                objectKey = arguments.key,
+                objectPath = zipFile.path
+            )
+        }
+
+        "restore" -> {
+            val arguments = ArgParser(commandArgs).parseInto(::ArgsRestore)
+            val tmpZipFile = File.createTempFile("out", "zip")
+            S3Interaction.getObjectBytes(
+                bucketName = arguments.bucket,
+                keyName = arguments.key,
+                zipOutputFile = tmpZipFile
+            )
+            ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = arguments.outDir)
+        }
+
+        else -> { // Note the block
+            print("x is neither 1 nor 2")
+        }
+    }
+
+
     val inputDir = File("/home/omar/Desktop/leetcode")
     val outDirPath = "/home/omar/Desktop/leetcode_out"
     val zipFile = ZipManager.zipFolderIntoTmp(inputDir)
