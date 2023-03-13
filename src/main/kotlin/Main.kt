@@ -1,12 +1,15 @@
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.Path
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.exists
+
+import kotlin.io.path.pathString
 import kotlin.system.exitProcess
 
 
-//restore-file --out abc --bucket abc --key abc
-//
-//delete-bucket --bucket abc
 class ArgsListBucket(parser: ArgParser) {
     val bucket by parser.storing(
         "-b", "--bucket",
@@ -40,6 +43,28 @@ class ArgsRestore(parser: ArgParser) {
     val outDir by parser.storing(
         "-o", "--out-dir",
         help = "path to the restoring directory"
+    )
+
+    val key by parser.storing(
+        "-k", "--key",
+        help = "name of the backup file in S3"
+    )
+}
+
+class ArgsRestoreFile(parser: ArgParser) {
+    val bucket by parser.storing(
+        "-b", "--bucket",
+        help = "bucket name"
+    ).default(Defaults.DEFAULT_BUCKET)
+
+    val outDir by parser.storing(
+        "-o", "--out-dir",
+        help = "path to the restoring directory"
+    )
+
+    val filePath by parser.storing(
+        "-f", "--file",
+        help = "the file path in the stored directory"
     )
 
     val key by parser.storing(
@@ -116,6 +141,25 @@ fun main(args: Array<String>) {
             ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = arguments.outDir)
         }
 
+        "restore-file" -> {
+            val arguments = ArgParser(commandArgs).parseInto(::ArgsRestoreFile)
+            val tmpZipFile = File.createTempFile("out", "zip")
+            S3Interaction.getObjectBytes(
+                bucketName = arguments.bucket,
+                keyName = arguments.key,
+                zipOutputFile = tmpZipFile
+            )
+            val tmpDir = createTempDirectory(prefix = "tmpDir")
+            ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = tmpDir.pathString)
+            val tmpPath = Path(tmpDir.pathString, arguments.filePath)
+            val newPath = Path(arguments.outDir, arguments.filePath)
+            println(newPath.parent)
+            if (!newPath.parent.exists()) {
+                File(newPath.parent.pathString).mkdirs()   // todo fix it
+            }
+            Files.move(tmpPath, newPath)
+        }
+
         "delete-backup" -> {
             val arguments = ArgParser(commandArgs).parseInto(::ArgsDeleteBackup)
             S3Interaction.deleteBucketObjects(bucketName = arguments.bucket, objectName = arguments.key)
@@ -130,7 +174,5 @@ fun main(args: Array<String>) {
             print("x is neither 1 nor 2")
         }
     }
-
-
 }
 
