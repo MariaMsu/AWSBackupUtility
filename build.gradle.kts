@@ -20,6 +20,9 @@ dependencies {
 
     implementation("org.slf4j:slf4j-api:1.7.5")
     implementation("org.slf4j:slf4j-simple:1.6.4")
+
+    // https://mvnrepository.com/artifact/com.xenomachina/kotlin-argparser
+    implementation("com.xenomachina:kotlin-argparser:2.0.7")
 }
 
 tasks.test {

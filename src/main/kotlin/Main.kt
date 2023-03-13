@@ -1,16 +1,35 @@
 // snippet-start:[s3.kotlin.create_bucket.import]
-import aws.sdk.kotlin.services.s3.S3Client
-import aws.sdk.kotlin.services.s3.model.CreateBucketRequest
-import aws.sdk.kotlin.services.s3.model.DeleteBucketRequest
-import aws.sdk.kotlin.services.s3.model.GetObjectRequest
-import aws.sdk.kotlin.services.s3.model.PutObjectRequest
-import aws.smithy.kotlin.runtime.content.asByteStream
-import aws.smithy.kotlin.runtime.content.writeToFile
+import com.xenomachina.argparser.ArgParser
+import com.xenomachina.argparser.default
 import java.io.File
 
 
 //import kotlin.system.exitProcess
 // snippet-end:[s3.kotlin.create_bucket.import]
+
+
+class MyArgs(parser: ArgParser) {
+    val verbose by parser.flagging(
+        "-v", "--verbose",
+        help = "enable verbose mode").default("verbose")
+
+    val name by parser.storing(
+        "-N", "--name",
+        help = "name of the user").default("John Doe")
+
+    val count by parser.storing(
+        "-c", "--count",
+        help = "number of widgets") { toInt() }.default("1")
+
+    val source by parser.positional(
+        "SOURCE",
+        help = "source filename").default("file/")
+
+    val destination by parser.positional(
+        "DEST",
+        help = "destination filename").default("new_file/")
+}
+
 
 /**
 Before running this Kotlin code example, set up your development environment,
@@ -19,6 +38,11 @@ For more information, see the following documentation topic:
 https://docs.aws.amazon.com/sdk-for-kotlin/latest/developer-guide/setup.html
  */
 suspend fun main(args: Array<String>) {
+    ArgParser(args).parseInto(::MyArgs).run {
+        println("Hello, ${name}!")
+        println("I'm going to move ${count} widgets from ${source} to ${destination}.")
+        // TODO: move widgets
+    }
 
     val usage = """
     Usage:
