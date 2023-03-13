@@ -2,6 +2,13 @@
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.CreateBucketRequest
 import aws.sdk.kotlin.services.s3.model.DeleteBucketRequest
+//import org.graalvm.compiler.debug.DiagnosticsOutputDirectory
+//import java.io.BufferedOutputStream
+import java.io.File
+//import java.io.FileOutputStream
+//import java.util.zip.ZipEntry
+//import java.util.zip.ZipOutputStream
+
 //import kotlin.system.exitProcess
 // snippet-end:[s3.kotlin.create_bucket.import]
 
@@ -25,9 +32,17 @@ suspend fun main(args: Array<String>) {
 //        exitProcess(0)
 //    }
 //    val bucketName = args[0]
+    val inputDir = File("/home/omar/Desktop/leetcode")
+    val outDirPath = "/home/omar/Desktop/leetcode_out"
+    val zipFile = ZipManager.zipFolderIntoTmp(inputDir)
+    ZipManager.unzip(zipFilePath = zipFile, destDirectory = outDirPath)
+
     val bucketName = "test412"
-    deleteExistingBucket(bucketName)
+//    deleteExistingBucket(bucketName)
 }
+
+
+
 
 // snippet-start:[s3.kotlin.create_bucket.main]
 suspend fun createNewBucket(bucketName: String) {
