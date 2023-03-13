@@ -1,16 +1,10 @@
-// snippet-start:[s3.kotlin.create_bucket.import]
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import java.io.File
 import kotlin.system.exitProcess
 
-// snippet-end:[s3.kotlin.create_bucket.import]
 
-//restore --out-dir abc --bucket abc --key abc
-//
 //restore-file --out abc --bucket abc --key abc
-//
-//delete-backup --bucket abc --key abc
 //
 //delete-bucket --bucket abc
 class ArgsListBucket(parser: ArgParser) {
@@ -52,6 +46,25 @@ class ArgsRestore(parser: ArgParser) {
         "-k", "--key",
         help = "name of the backup file in S3"
     )
+}
+
+class ArgsDeleteBackup(parser: ArgParser) {
+    val bucket by parser.storing(
+        "-b", "--bucket",
+        help = "bucket name"
+    ).default(Defaults.DEFAULT_BUCKET)
+
+    val key by parser.storing(
+        "-k", "--key",
+        help = "name of the backup file in S3"
+    )
+}
+
+class ArgsDeleteBucket(parser: ArgParser) {
+    val bucket by parser.storing(
+        "-b", "--bucket",
+        help = "bucket name"
+    ).default(Defaults.DEFAULT_BUCKET)
 }
 
 /**
@@ -103,20 +116,21 @@ fun main(args: Array<String>) {
             ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = arguments.outDir)
         }
 
+        "delete-backup" -> {
+            val arguments = ArgParser(commandArgs).parseInto(::ArgsDeleteBackup)
+            S3Interaction.deleteBucketObjects(bucketName = arguments.bucket, objectName = arguments.key)
+        }
+
+        "delete-bucket" -> {
+            val arguments = ArgParser(commandArgs).parseInto(::ArgsDeleteBucket)
+            S3Interaction.deleteExistingBucket(bucketName = arguments.bucket)
+        }
+
         else -> { // Note the block
             print("x is neither 1 nor 2")
         }
     }
 
 
-    val inputDir = File("/home/omar/Desktop/leetcode")
-    val outDirPath = "/home/omar/Desktop/leetcode_out"
-    val zipFile = ZipManager.zipFolderIntoTmp(inputDir)
-    ZipManager.unzip(zipFilePath = zipFile, destDirectory = outDirPath)
-
-    val bucketName = "test416"
-    val objectKey = "1"
-//    putS3Object(bucketName=bucketName, objectKey=objectKey, objectPath=zipFile.path)
-//    deleteExistingBucket(bucketName)
 }
 
