@@ -2,7 +2,9 @@ package actions
 
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
-import java.io.File
+import utils.S3Interaction
+import utils.ZipManager
+import kotlin.io.path.*
 
 object RestoreAction : Action {
     override val name = "restore"
@@ -24,21 +26,26 @@ object RestoreAction : Action {
         )
     }
 
-    fun run(bucketName: String, objectKey: String, outDir: String) {
-        val tmpZipFile = File.createTempFile("out", "zip")
+    /**
+     * download a compressed file from S3 and extract it
+     */
+    fun run(bucket: String, key: String, outDirStr: String) {
+        val tmpZipFile = createTempFile()
         S3Interaction.getObjectBytes(
-            bucketName = bucketName,
-            keyName = objectKey,
+            bucketName = bucket,
+            keyName = key,
             zipOutputFile = tmpZipFile
         )
-        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = outDir)
+        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = Path( outDirStr))
     }
 
     /**
-    example: restore -o /home/omar/Desktop/testDirOut -k backupTest
+    how to call from bash:
+    $ restore -o /home/omar/Desktop/testDirOut -k backupTest
      **/
     override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(RestoreAction::UserArgs)
-        run(bucketName = arguments.bucket, objectKey = arguments.key, outDir = arguments.outDir)
+        run(bucket = arguments.bucket, key = arguments.key, outDirStr = arguments.outDir)
+        println("Successfully read ${arguments.key} from ${arguments.bucket} and wrote to ${arguments.outDir}")
     }
 }

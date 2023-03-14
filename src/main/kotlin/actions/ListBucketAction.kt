@@ -4,6 +4,7 @@ import aws.sdk.kotlin.services.s3.model.ListObjectsResponse
 import aws.sdk.kotlin.services.s3.model.NoSuchBucket
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
+import utils.S3Interaction
 
 object ListBucketAction : Action {
     override val name = "list-bucket"

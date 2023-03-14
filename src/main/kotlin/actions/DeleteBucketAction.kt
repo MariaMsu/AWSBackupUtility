@@ -2,6 +2,7 @@ package actions
 
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
+import utils.S3Interaction
 
 object DeleteBucketAction : Action {
     override val name = "delete-bucket"

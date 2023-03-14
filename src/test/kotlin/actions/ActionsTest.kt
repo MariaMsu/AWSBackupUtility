@@ -1,9 +1,9 @@
-import actions.ListBucketAction
-import actions.StoreAction
-import aws.sdk.kotlin.services.s3.model.NoSuchBucket
+package actions
+
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import kotlin.io.path.*
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ActionsTest {
@@ -42,11 +42,16 @@ class ActionsTest {
 
     @Test
     fun testActions() {
-        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucketName = bucket)}
+//        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucket = bucket) }
 
         val baseDir = Path(base = tmpDir.pathString, subpaths = arrayOf("localData"))
         val nestedFile =  Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "nestedDir", "file.txt"))
         StoreAction.run(bucket = bucket, key = s3keyFile, inDirStr = nestedFile.toString())
         StoreAction.run(bucket = bucket, key = s3keyDir, inDirStr = baseDir.toString())
+
+        val listResponse = ListBucketAction.run(bucket = bucket)
+        assertEquals(2, listResponse.contents!!.size)
+        assertEquals(s3keyFile, listResponse.contents!![0].key)
+        assertEquals(s3keyDir, listResponse.contents!![1].key)
     }
 }

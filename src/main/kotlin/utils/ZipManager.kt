@@ -1,3 +1,5 @@
+package utils
+
 import java.io.*
 import java.nio.file.Path
 
@@ -8,12 +10,15 @@ import kotlin.io.path.*
 
 object ZipManager {
 
+    /**
+     * compress a file or a folder and write it to the outputZip file
+     */
     @OptIn(ExperimentalPathApi::class)
-    fun zipFolderIntoTmp(inputDirectory: Path): Path {
-        val outputZipFile = createTempFile()
-        ZipOutputStream(BufferedOutputStream(outputZipFile.outputStream())).use { zos ->
-            inputDirectory.walk().forEach { file ->
-                val zipFileName = file.absolutePathString().removePrefix(inputDirectory.absolutePathString()).removePrefix("/")
+    fun zipFolderIntoTmp(inputFileOrFolder: Path, outputZip: Path): Path {
+        ZipOutputStream(BufferedOutputStream(outputZip.outputStream())).use { zos ->
+            inputFileOrFolder.walk().forEach { file ->
+                val zipFileName =
+                    file.absolutePathString().removePrefix(inputFileOrFolder.absolutePathString()).removePrefix("/")
                 val entry = ZipEntry("$zipFileName${(if (file.isDirectory()) "/" else "")}")
                 zos.putNextEntry(entry)
                 if (file.isRegularFile()) {
@@ -21,52 +26,42 @@ object ZipManager {
                 }
             }
         }
-        return outputZipFile
+        return outputZip
     }
 
     /**
-     * @param zipFilePath
-     * @param destDirectory
-     * @throws IOException
+     * extract a file or a folder and write it to the destDirectory
      */
     @Throws(IOException::class)
-    fun unzip(zipFilePath: File, destDirectory: String) {
+    fun unzip(zipFilePath: Path, destDirectory: Path) {
 
-        File(destDirectory).run {
-            if (!exists()) {
-                mkdirs()
-            }
+        if (!destDirectory.exists()) {
+            destDirectory.createDirectories()
         }
 
-        ZipFile(zipFilePath).use { zip ->
-
+        ZipFile(zipFilePath.toFile()).use { zip ->
             zip.entries().asSequence().forEach { entry ->
-
                 zip.getInputStream(entry).use { input ->
+                    val filePath =  Path(base = destDirectory.pathString, subpaths = arrayOf(entry.name))
 
-
-                    val filePath = destDirectory + File.separator + entry.name
-
-                    if (!entry.isDirectory) {
-                        // if the entry is a file, extracts it
-                        extractFile(input, filePath)
-                    } else {
+                    if (entry.isDirectory) {
                         // if the entry is a directory, make the directory
-                        val dir = File(filePath)
-                        dir.mkdir()
+                        filePath.createDirectories()
+                        println("!!! create dir: ${filePath}")
+                    } else {
+                        // if the entry is a file, extracts it
+                        filePath.parent.createDirectories()
+                        filePath.createFile()
+                        println("!!! create file: ${filePath}")
+                        extractFile(input, filePath.pathString)
                     }
-
                 }
-
             }
         }
     }
 
     /**
      * Extracts a zip entry (file entry)
-     * @param inputStream
-     * @param destFilePath
-     * @throws IOException
      */
     @Throws(IOException::class)
     private fun extractFile(inputStream: InputStream, destFilePath: String) {

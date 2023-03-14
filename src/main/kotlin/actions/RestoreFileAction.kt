@@ -2,6 +2,8 @@ package actions
 
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
+import utils.S3Interaction
+import utils.ZipManager
 import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.Path
@@ -35,14 +37,14 @@ object RestoreFileAction : Action {
     }
 
     fun run(bucketName: String, objectKey: String, outDir: String, filePath: String) {
-        val tmpZipFile = File.createTempFile("out", "zip")
+        val tmpZipFile = kotlin.io.path.createTempFile()
         S3Interaction.getObjectBytes(
             bucketName = bucketName,
             keyName = objectKey,
             zipOutputFile = tmpZipFile
         )
         val tmpDir = createTempDirectory(prefix = "tmpDir")
-        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = tmpDir.pathString)
+        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = tmpDir)
         val tmpPath = Path(tmpDir.pathString, filePath)
         val newPath = Path(outDir, filePath)
         println(newPath.parent)

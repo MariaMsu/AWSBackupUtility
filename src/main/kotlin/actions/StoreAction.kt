@@ -1,8 +1,8 @@
 package actions
 
 import Defaults
-import S3Interaction
-import ZipManager
+import utils.S3Interaction
+import utils.ZipManager
 import aws.sdk.kotlin.services.s3.model.PutObjectResponse
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
@@ -34,7 +34,8 @@ object StoreAction: Action {
      * Compress a folder or a file to a zip archive and put it to S3
      */
     fun run(bucket: String, key: String, inDirStr: String): PutObjectResponse {
-        val zipFile = ZipManager.zipFolderIntoTmp(Path(inDirStr))
+        val zipFile = kotlin.io.path.createTempFile()
+        ZipManager.zipFolderIntoTmp(inputFileOrFolder = Path(inDirStr), outputZip=zipFile)
         val response = S3Interaction.putS3Object(
             bucketName = bucket,
             objectKey = key,

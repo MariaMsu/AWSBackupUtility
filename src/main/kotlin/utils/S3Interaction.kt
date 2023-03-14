@@ -1,9 +1,12 @@
+package utils
+
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.*
 import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.content.writeToFile
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.nio.file.Path
 
 // based on https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/kotlin/services/s3/src/main/kotlin/com/kotlin/s3
 object S3Interaction {
@@ -12,12 +15,11 @@ object S3Interaction {
         val request = ListObjectsRequest { bucket = bucketName }
 
         S3Client { region = "us-east-1" }.use { s3 ->
-            val response = runBlocking { s3.listObjects(request) }
-            return response
+            return runBlocking { s3.listObjects(request) }
         }
     }
 
-    fun getObjectBytes(bucketName: String, keyName: String, zipOutputFile: File) {
+    fun getObjectBytes(bucketName: String, keyName: String, zipOutputFile: Path) {
         val request = GetObjectRequest {
             key = keyName
             bucket = bucketName
@@ -27,7 +29,6 @@ object S3Interaction {
             runBlocking {
                 s3.getObject(request) { resp ->
                     resp.body?.writeToFile(zipOutputFile)
-                    println("Successfully read $keyName from $bucketName")
                 }
             }
         }
