@@ -1,4 +1,4 @@
-package Actions
+package actions
 
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default

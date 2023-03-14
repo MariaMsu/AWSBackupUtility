@@ -1,8 +1,7 @@
-package Actions
+package actions
 
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
-import java.io.File
 
 object DeleteBackupAction : Action {
     override val name = "delete-backup"
