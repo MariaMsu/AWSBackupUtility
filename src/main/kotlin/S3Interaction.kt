@@ -87,7 +87,7 @@ object S3Interaction {
 
         try {
             S3Client { region = "us-east-1" }.use { s3 ->
-                runBlocking { println(s3.headBucket(request)) }
+                runBlocking { s3.headBucket(request) }
             }
         } catch (e: S3Exception) {
             println("A bucket with the name '$bucketName' does not yet exist")
