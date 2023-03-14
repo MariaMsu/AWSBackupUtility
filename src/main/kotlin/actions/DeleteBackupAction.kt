@@ -25,7 +25,7 @@ object DeleteBackupAction : Action {
     /**
     example: delete-backup -k backupTest
      **/
-    override fun parseArgsAndRun(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(DeleteBackupAction::UserArgs)
         run(bucketName = arguments.bucket, objectKey = arguments.key)
     }

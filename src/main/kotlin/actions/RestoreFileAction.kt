@@ -55,7 +55,7 @@ object RestoreFileAction : Action {
     /**
     example: restore-file -o /home/omar/Desktop/testDirSingleFile -f gradle/wrapper/gradle-wrapper.properties -k backupTest
      **/
-    override fun parseArgsAndRun(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(RestoreFileAction::UserArgs)
         run(
             bucketName = arguments.bucket,

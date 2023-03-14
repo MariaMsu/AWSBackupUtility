@@ -20,7 +20,7 @@ object DeleteBucketAction : Action {
     /**
     example: delete-bucket
      **/
-    override fun parseArgsAndRun(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(DeleteBucketAction::UserArgs)
         run(bucketName = arguments.bucket)
     }

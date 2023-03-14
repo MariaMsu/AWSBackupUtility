@@ -37,7 +37,7 @@ object RestoreAction : Action {
     /**
     example: restore -o /home/omar/Desktop/testDirOut -k backupTest
      **/
-    override fun parseArgsAndRun(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(RestoreAction::UserArgs)
         run(bucketName = arguments.bucket, objectKey = arguments.key, outDir = arguments.outDir)
     }

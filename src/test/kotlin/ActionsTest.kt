@@ -1,9 +1,7 @@
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Test
-
+import actions.ListBucketAction
+import aws.sdk.kotlin.services.s3.model.NoSuchBucket
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.TestInstance
 import java.nio.file.Path
 import kotlin.io.path.*
 
@@ -11,7 +9,7 @@ import kotlin.io.path.*
 class ActionsTest {
 
     val bucket = "backup-jetbrains-test"
-    private var tmpDir: Path? = null
+    private var tmpDir: Path = createTempDirectory(prefix = "tmpTestDir")
 
     /**
     creates test data
@@ -19,30 +17,30 @@ class ActionsTest {
     └── localData
         ├── nestedDir
         │   └── file.txt
-        └── ха-ха-ыыы.txt
+        └── ха-ха-ыыы.txt  // not ascii symbols
      **/
     @BeforeAll
     fun createTestLocalData() {
         tmpDir = createTempDirectory(prefix = "tmpTestDir")
-        println("Temporary teat data located in $tmpDir")
+        println("Temporary test data is located in $tmpDir")
 
-        Path(base = tmpDir!!.pathString, subpaths = arrayOf("localData")).createDirectories()
-        Path(base = tmpDir!!.pathString, subpaths = arrayOf("localData", "ха-ха-ыыы.txt"))
+        Path(base = tmpDir.pathString, subpaths = arrayOf("localData")).createDirectories()
+        Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "ха-ха-ыыы.txt"))
             .createFile().writeText("Гамарджоба, генацвале!")  // not ascii symbols
-        Path(base = tmpDir!!.pathString, subpaths = arrayOf("localData", "nestedDir")).createDirectories()
-        Path(base = tmpDir!!.pathString, subpaths = arrayOf("localData", "nestedDir", "file.txt"))
+        Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "nestedDir")).createDirectories()
+        Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "nestedDir", "file.txt"))
             .createFile().writeText("some\ntest\ntext")
     }
 
     @OptIn(ExperimentalPathApi::class)
     @AfterAll
-    fun deleteTestLocalData(){
-        tmpDir?.deleteRecursively()
+    fun deleteTestLocalData() {
+        tmpDir.deleteRecursively()
     }
 
     @Test
-    fun testS3() {
-        assertEquals(1, 1)
-        println("EEEEEEEEEEE")
+    fun testActions() {
+        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucketName = bucket)}
+
     }
 }

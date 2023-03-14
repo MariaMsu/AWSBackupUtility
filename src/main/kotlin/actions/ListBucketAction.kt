@@ -1,5 +1,7 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.NoSuchBucket
+import aws.sdk.kotlin.services.s3.model.Object
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 
@@ -13,15 +15,35 @@ object ListBucketAction : Action {
         ).default(Defaults.DEFAULT_BUCKET)
     }
 
-    fun run(bucketName: String) {
-        S3Interaction.listBucketObjects(bucketName = bucketName)
+    fun run(bucketName: String): List<Object>? {
+        return S3Interaction.listBucketObjects(bucketName = bucketName)
     }
 
     /**
-    example: list-bucket
+     how to call from bash:
+     $ list-bucket
      **/
-    override fun parseArgsAndRun(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(::UserArgs)
-        run(bucketName = arguments.bucket)
+        val contents: List<Object>?
+        try {
+            contents = run(bucketName = arguments.bucket)
+        } catch (e: NoSuchBucket) {
+            println("A bucket with the name '${arguments.bucket}' does not yet exist")
+            return
+        }
+        if (contents != null) {
+            contents.forEach { myObject ->
+                println("The name of the key is ${myObject.key}")
+                println("The object is ${calculateKb(myObject.size)} KBs")
+                println("The owner is ${myObject.owner}")
+            }
+        } else {
+            println("A bucket '${arguments.bucket}' is empty")
+        }
+    }
+
+    private fun calculateKb(intValue: Long): Long {
+        return intValue / 1024
     }
 }

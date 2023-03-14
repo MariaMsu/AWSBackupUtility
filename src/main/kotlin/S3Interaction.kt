@@ -9,23 +9,14 @@ import java.util.zip.ZipFile
 // based on https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/kotlin/services/s3/src/main/kotlin/com/kotlin/s3
 object S3Interaction {
 
-    fun listBucketObjects(bucketName: String) {
+    fun listBucketObjects(bucketName: String): List<Object>? {
         val request = ListObjectsRequest { bucket = bucketName }
 
         S3Client { region = "us-east-1" }.use { s3 ->
             val response = runBlocking { s3.listObjects(request) }
-            response.contents?.forEach { myObject ->
-                println("The name of the key is ${myObject.key}")
-                println("The object is ${calKb(myObject.size)} KBs")
-                println("The owner is ${myObject.owner}")
-            }
+            return response.contents
         }
     }
-
-    private fun calKb(intValue: Long): Long {
-        return intValue / 1024
-    }
-
 
     fun getObjectBytes(bucketName: String, keyName: String, zipOutputFile: File) {
         val request = GetObjectRequest {

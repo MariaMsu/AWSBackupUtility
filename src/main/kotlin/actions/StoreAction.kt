@@ -39,7 +39,7 @@ object StoreAction: Action {
     /**
      example: store -i /home/omar/Desktop/testDir -k backupTest
      **/
-    override fun parseArgsAndRun(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(StoreAction::UserArgs)
         run(bucketName = arguments.bucket, objectKey = arguments.key, inDir = arguments.inDir)
     }
