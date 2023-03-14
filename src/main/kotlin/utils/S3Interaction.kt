@@ -1,5 +1,6 @@
 package utils
 
+import Defaults.S3_REGION
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.*
 import aws.smithy.kotlin.runtime.content.asByteStream
@@ -14,7 +15,7 @@ object S3Interaction {
     fun listBucketObjects(bucketName: String): ListObjectsResponse {
         val request = ListObjectsRequest { bucket = bucketName }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             return runBlocking { s3.listObjects(request) }
         }
     }
@@ -25,7 +26,7 @@ object S3Interaction {
             bucket = bucketName
         }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION}.use { s3 ->
             runBlocking {
                 s3.getObject(request) { resp ->
                     resp.body?.writeToFile(zipOutputFile)
@@ -44,7 +45,7 @@ object S3Interaction {
         }
 
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             return runBlocking { s3.putObject(request) }
         }
     }
@@ -58,7 +59,7 @@ object S3Interaction {
             delete = delOb
         }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             runBlocking { s3.deleteObjects(request) }
         }
     }
@@ -66,7 +67,7 @@ object S3Interaction {
     fun createNewBucket(bucketName: String) {
         val request = CreateBucketRequest { bucket = bucketName }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             runBlocking { s3.createBucket(request) }
             println("$bucketName is ready")
         }
@@ -76,7 +77,7 @@ object S3Interaction {
         val request = HeadBucketRequest { bucket = bucketName }
 
         try {
-            S3Client { region = "us-east-1" }.use { s3 ->
+            S3Client { region = S3_REGION }.use { s3 ->
                 runBlocking { s3.headBucket(request) }
             }
         } catch (e: S3Exception) {
@@ -89,9 +90,8 @@ object S3Interaction {
     fun deleteExistingBucket(bucketName: String?) {
         val request = DeleteBucketRequest { bucket = bucketName }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             runBlocking { s3.deleteBucket(request) }
-            println("The $bucketName was successfully deleted")
         }
     }
 }

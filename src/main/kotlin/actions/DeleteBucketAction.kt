@@ -29,6 +29,8 @@ object DeleteBucketAction : Action {
             run(bucket = arguments.bucket)
         }catch (e: S3Exception){
             println(e.message)
+            return
         }
+        println("The ${arguments.bucket} was successfully deleted")
     }
 }
