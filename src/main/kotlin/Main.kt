@@ -35,7 +35,16 @@ fun main(args: Array<String>) {
     val commandArgs = args.drop(1).toTypedArray()
     val action = command2action[command]
     if (action != null) {
-        action.parseArgsAndCall(commandArgs)
+        try {
+            if (action.parseArgsAndCall(commandArgs)) {
+                exitProcess(0)
+            } else {
+                exitProcess(-1)
+            }
+        } catch (e: Exception) {
+            println(e.message)
+            exitProcess(-1)
+        }
     } else {
         println(usage)
         exitProcess(-1)

@@ -63,7 +63,7 @@ object RestoreFileAction : Action {
     how to call from bash:
     restore-file -o /home/omar/Desktop/testDirSingleFile -f gradle/wrapper/gradle-wrapper.properties -k backupTest
      **/
-    override fun parseArgsAndCall(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>): Boolean {
         val arguments = ArgParser(commandArgs).parseInto(RestoreFileAction::UserArgs)
         try {
             run(
@@ -74,15 +74,16 @@ object RestoreFileAction : Action {
             )
         } catch (e: S3Exception) {
             println("The bucket with the name '${arguments.bucket}' or key '${arguments.key}' does not exist")
-            return
+            return false
         } catch (e: FileAlreadyExistsException) {
             println(e.reason)
-            return
+            return false
         } catch (e: NoSuchFileException) {
             println(e.reason)
-            return
+            return false
         }
 
         println("Successfully read ${arguments.key} from ${arguments.bucket} and wrote to ${arguments.outDir}")
+        return true
     }
 }

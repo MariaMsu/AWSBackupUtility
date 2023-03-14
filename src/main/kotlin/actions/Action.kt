@@ -7,5 +7,5 @@ interface Action {
     /**
      * @param commandArgs consists of strings specified in UserArgs field in each implementing class
      */
-    fun parseArgsAndCall(commandArgs: Array<String>)
+    fun parseArgsAndCall(commandArgs: Array<String>): Boolean
 }

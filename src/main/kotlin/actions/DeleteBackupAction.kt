@@ -27,9 +27,10 @@ object DeleteBackupAction : Action {
     how to call from bash:
     $ delete-backup -k backupTest
      **/
-    override fun parseArgsAndCall(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>): Boolean {
         val arguments = ArgParser(commandArgs).parseInto(DeleteBackupAction::UserArgs)
         run(bucket = arguments.bucket, key = arguments.key)
         println("${arguments.key} was deleted from ${arguments.bucket}")
+        return true
     }
 }

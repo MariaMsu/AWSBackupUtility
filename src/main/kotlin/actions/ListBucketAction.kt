@@ -24,14 +24,14 @@ object ListBucketAction : Action {
      how to call from bash:
      $ list-bucket
      **/
-    override fun parseArgsAndCall(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>): Boolean {
         val arguments = ArgParser(commandArgs).parseInto(::UserArgs)
         val response: ListObjectsResponse
         try {
             response = run(bucket = arguments.bucket)
         } catch (e: NoSuchBucket) {
             println("A bucket with the name '${arguments.bucket}' does not yet exist")
-            return
+            return false
         }
         val contents = response.contents
         if (contents != null) {
@@ -43,6 +43,7 @@ object ListBucketAction : Action {
         } else {
             println("A bucket '${arguments.bucket}' is empty")
         }
+        return true
     }
 
     private fun calculateKb(intValue: Long): Long {

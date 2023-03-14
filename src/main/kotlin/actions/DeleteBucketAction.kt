@@ -23,14 +23,15 @@ object DeleteBucketAction : Action {
     how to call from bash:
     $ delete-bucket
      **/
-    override fun parseArgsAndCall(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>): Boolean {
         val arguments = ArgParser(commandArgs).parseInto(DeleteBucketAction::UserArgs)
         try {
             run(bucket = arguments.bucket)
         }catch (e: S3Exception){
             println(e.message)
-            return
+            return false
         }
         println("The ${arguments.bucket} was successfully deleted")
+        return true
     }
 }

@@ -47,17 +47,18 @@ object RestoreAction : Action {
     how to call from bash:
     $ restore -o /home/omar/Desktop/testDirOut -k backupTest
      **/
-    override fun parseArgsAndCall(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>): Boolean {
         val arguments = ArgParser(commandArgs).parseInto(RestoreAction::UserArgs)
         try {
             run(bucket = arguments.bucket, key = arguments.key, outDirStr = arguments.outDir)
         } catch (e: S3Exception) {
             println("The bucket with the name '${arguments.bucket}' or key '${arguments.key}' does not exist")
-            return
+            return false
         } catch (e: FileAlreadyExistsException) {
             println(e.reason)
-            return
+            return false
         }
         println("Successfully read ${arguments.key} from ${arguments.bucket} and wrote to ${arguments.outDir}")
+        return true
     }
 }

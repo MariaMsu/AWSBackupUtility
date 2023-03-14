@@ -47,9 +47,10 @@ object StoreAction : Action {
     how to call from bash:
     $ store -i /home/omar/Desktop/testDir -k backupTest
      **/
-    override fun parseArgsAndCall(commandArgs: Array<String>) {
+    override fun parseArgsAndCall(commandArgs: Array<String>): Boolean {
         val arguments = ArgParser(commandArgs).parseInto(StoreAction::UserArgs)
         val response = run(bucket = arguments.bucket, key = arguments.key, inDirStr = arguments.inDir)
         println("Tag information is ${response.eTag}")
+        return true
     }
 }
