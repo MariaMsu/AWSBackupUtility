@@ -1,5 +1,6 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.S3Exception
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import utils.S3Interaction
@@ -36,7 +37,7 @@ object RestoreAction : Action {
             keyName = key,
             zipOutputFile = tmpZipFile
         )
-        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = Path( outDirStr))
+        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = Path(outDirStr))
     }
 
     /**
@@ -45,7 +46,12 @@ object RestoreAction : Action {
      **/
     override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(RestoreAction::UserArgs)
-        run(bucket = arguments.bucket, key = arguments.key, outDirStr = arguments.outDir)
+        try {
+            run(bucket = arguments.bucket, key = arguments.key, outDirStr = arguments.outDir)
+        } catch (e: S3Exception) {
+            println("The bucket with the name '${arguments.bucket}' or key '${arguments.key}' does not exist")
+            return
+        }
         println("Successfully read ${arguments.key} from ${arguments.bucket} and wrote to ${arguments.outDir}")
     }
 }

@@ -42,17 +42,15 @@ object ZipManager {
         ZipFile(zipFilePath.toFile()).use { zip ->
             zip.entries().asSequence().forEach { entry ->
                 zip.getInputStream(entry).use { input ->
-                    val filePath =  Path(base = destDirectory.pathString, subpaths = arrayOf(entry.name))
+                    val filePath = Path(base = destDirectory.pathString, subpaths = arrayOf(entry.name))
 
                     if (entry.isDirectory) {
                         // if the entry is a directory, make the directory
                         filePath.createDirectories()
-                        println("!!! create dir: ${filePath}")
                     } else {
                         // if the entry is a file, extracts it
                         filePath.parent.createDirectories()
                         filePath.createFile()
-                        println("!!! create file: ${filePath}")
                         extractFile(input, filePath.pathString)
                     }
                 }
@@ -78,5 +76,4 @@ object ZipManager {
      * Size of the buffer to read/write data
      */
     private const val BUFFER_SIZE = 4096
-
 }

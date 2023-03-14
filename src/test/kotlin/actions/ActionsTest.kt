@@ -1,7 +1,9 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.S3Exception
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import test_utils.LocalTestData
 import kotlin.io.path.*
 
 
@@ -11,47 +13,47 @@ class ActionsTest {
     private val bucket = "backup-jetbrains-test"
     private val s3keyDir = "backup-dir"
     private val s3keyFile = "backup-file"
-    private var tmpDir = createTempDirectory(prefix = "tmpTestDir")
+    private var ltd = LocalTestData()
+    private val zipFile = createTempFile()
 
-    /**
-    creates test data
-    tmpTestDir
-    └── localData
-        ├── nestedDir
-        │   └── file.txt
-        └── ха-ха-ыыы.txt  // test not ascii symbols
-     **/
-    @BeforeAll
-    fun createTestLocalData() {
-        tmpDir = createTempDirectory(prefix = "tmpTestDir")
-        println("Temporary test data is located in $tmpDir")
-
-        Path(base = tmpDir.pathString, subpaths = arrayOf("localData")).createDirectories()
-        Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "ха-ха-ыыы.txt"))
-            .createFile().writeText("Гамарджоба, генацвале!")  // test not ascii symbols
-        Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "nestedDir")).createDirectories()
-        Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "nestedDir", "file.txt"))
-            .createFile().writeText("some\ntest\ntext")
-    }
-
-    @OptIn(ExperimentalPathApi::class)
     @AfterAll
     fun deleteTestLocalData() {
-        tmpDir.deleteRecursively()
+        ltd.deleteAllData()
+        zipFile.deleteExisting()
     }
 
     @Test
     fun testActions() {
 //        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucket = bucket) }
 
-        val baseDir = Path(base = tmpDir.pathString, subpaths = arrayOf("localData"))
-        val nestedFile =  Path(base = tmpDir.pathString, subpaths = arrayOf("localData", "nestedDir", "file.txt"))
-        StoreAction.run(bucket = bucket, key = s3keyFile, inDirStr = nestedFile.toString())
-        StoreAction.run(bucket = bucket, key = s3keyDir, inDirStr = baseDir.toString())
+        StoreAction.run(bucket = bucket, key = s3keyFile, inDirStr = ltd.file2.toString())
+        StoreAction.run(bucket = bucket, key = s3keyDir, inDirStr = ltd.baseDir.toString())
 
         val listResponse = ListBucketAction.run(bucket = bucket)
         assertEquals(2, listResponse.contents!!.size)
-        assertEquals(s3keyFile, listResponse.contents!![0].key)
-        assertEquals(s3keyDir, listResponse.contents!![1].key)
+
+        val expectedKeySet = setOf<String>(s3keyDir, s3keyFile)
+        val actualKeySet = setOf<String>(listResponse.contents!![0].key!!, listResponse.contents!![1].key!!)
+        assertEquals(expectedKeySet, actualKeySet)
+
+        // this bucket does not exist
+        assertThrows(S3Exception::class.java) {
+            RestoreAction.run(
+                bucket = bucket + "123",
+                key = s3keyDir,
+                outDirStr = ltd.baseOutDir.pathString
+            )
+        }
+        // this key does not exist
+        assertThrows(S3Exception::class.java) {
+            RestoreAction.run(
+                bucket = bucket,
+                key = s3keyDir + "123",
+                outDirStr = ltd.baseOutDir.pathString
+            )
+        }
+        RestoreAction.run(bucket = bucket, key = s3keyDir, outDirStr = ltd.baseOutDir.pathString)
+        assertTrue(ltd.compareOriginAndOutDirs())
+
     }
 }
