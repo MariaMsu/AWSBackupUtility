@@ -1,7 +1,7 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.ListObjectsResponse
 import aws.sdk.kotlin.services.s3.model.NoSuchBucket
-import aws.sdk.kotlin.services.s3.model.Object
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 
@@ -11,12 +11,12 @@ object ListBucketAction : Action {
     private class UserArgs(parser: ArgParser) {
         val bucket by parser.storing(
             "-b", "--bucket",
-            help = "bucket name"
+            help = "S3 bucket name"
         ).default(Defaults.DEFAULT_BUCKET)
     }
 
-    fun run(bucketName: String): List<Object>? {
-        return S3Interaction.listBucketObjects(bucketName = bucketName)
+    fun run(bucket: String): ListObjectsResponse {
+        return S3Interaction.listBucketObjects(bucketName = bucket)
     }
 
     /**
@@ -25,13 +25,14 @@ object ListBucketAction : Action {
      **/
     override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(::UserArgs)
-        val contents: List<Object>?
+        val response: ListObjectsResponse
         try {
-            contents = run(bucketName = arguments.bucket)
+            response = run(bucket = arguments.bucket)
         } catch (e: NoSuchBucket) {
             println("A bucket with the name '${arguments.bucket}' does not yet exist")
             return
         }
+        val contents = response.contents
         if (contents != null) {
             contents.forEach { myObject ->
                 println("The name of the key is ${myObject.key}")

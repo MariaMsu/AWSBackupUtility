@@ -4,17 +4,16 @@ import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.content.writeToFile
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.util.zip.ZipFile
 
 // based on https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/kotlin/services/s3/src/main/kotlin/com/kotlin/s3
 object S3Interaction {
 
-    fun listBucketObjects(bucketName: String): List<Object>? {
+    fun listBucketObjects(bucketName: String): ListObjectsResponse {
         val request = ListObjectsRequest { bucket = bucketName }
 
         S3Client { region = "us-east-1" }.use { s3 ->
             val response = runBlocking { s3.listObjects(request) }
-            return response.contents
+            return response
         }
     }
 
@@ -34,7 +33,7 @@ object S3Interaction {
         }
     }
 
-    fun putS3Object(bucketName: String, objectKey: String, objectPath: String) {
+    fun putS3Object(bucketName: String, objectKey: String, objectPath: String): PutObjectResponse {
         createBucketIfDoesNotExist(bucketName = bucketName)
 
         val request = PutObjectRequest {
@@ -43,9 +42,9 @@ object S3Interaction {
             body = File(objectPath).asByteStream()
         }
 
+
         S3Client { region = "us-east-1" }.use { s3 ->
-            val response = runBlocking { s3.putObject(request) }
-            println("Tag information is ${response.eTag}")
+            return runBlocking { s3.putObject(request) }
         }
     }
 

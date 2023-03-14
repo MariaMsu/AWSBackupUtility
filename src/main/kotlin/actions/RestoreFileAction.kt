@@ -15,7 +15,7 @@ object RestoreFileAction : Action {
     private class UserArgs(parser: ArgParser) {
         val bucket by parser.storing(
             "-b", "--bucket",
-            help = "bucket name"
+            help = "S3 bucket name"
         ).default(Defaults.DEFAULT_BUCKET)
 
         val outDir by parser.storing(
@@ -30,7 +30,7 @@ object RestoreFileAction : Action {
 
         val key by parser.storing(
             "-k", "--key",
-            help = "name of the backup file in S3"
+            help = "name of the backup file in the S3 bucket"
         )
     }
 

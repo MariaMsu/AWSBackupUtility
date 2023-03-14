@@ -9,7 +9,7 @@ object DeleteBucketAction : Action {
     private class UserArgs(parser: ArgParser) {
         val bucket by parser.storing(
             "-b", "--bucket",
-            help = "bucket name"
+            help = "S3 bucket name"
         ).default(Defaults.DEFAULT_BUCKET)
     }
 

@@ -1,19 +1,22 @@
 import java.io.*
+import java.nio.file.Path
+
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import kotlin.io.path.*
 
 object ZipManager {
 
-    fun zipFolderIntoTmp(inputDirectory: File): File {
-        val outputZipFile = File.createTempFile("out", ".zip")
-        ZipOutputStream(BufferedOutputStream(FileOutputStream(outputZipFile))).use {
-                zos ->
-            inputDirectory.walkTopDown().forEach { file ->
-                val zipFileName = file.absolutePath.removePrefix(inputDirectory.absolutePath).removePrefix("/")
-                val entry = ZipEntry("$zipFileName${(if (file.isDirectory) "/" else "")}")
+    @OptIn(ExperimentalPathApi::class)
+    fun zipFolderIntoTmp(inputDirectory: Path): Path {
+        val outputZipFile = createTempFile()
+        ZipOutputStream(BufferedOutputStream(outputZipFile.outputStream())).use { zos ->
+            inputDirectory.walk().forEach { file ->
+                val zipFileName = file.absolutePathString().removePrefix(inputDirectory.absolutePathString()).removePrefix("/")
+                val entry = ZipEntry("$zipFileName${(if (file.isDirectory()) "/" else "")}")
                 zos.putNextEntry(entry)
-                if (file.isFile) {
+                if (file.isRegularFile()) {
                     file.inputStream().use { fis -> fis.copyTo(zos) }
                 }
             }
