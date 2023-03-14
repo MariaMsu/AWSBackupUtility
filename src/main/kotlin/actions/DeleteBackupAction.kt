@@ -19,15 +19,17 @@ object DeleteBackupAction : Action {
         )
     }
 
-    fun run(bucketName: String, objectKey: String) {
-        S3Interaction.deleteBucketObjects(bucketName = bucketName, objectName = objectKey)
+    fun run(bucket: String, key: String) {
+        S3Interaction.deleteBucketObjects(bucketName = bucket, objectName = key)
     }
 
     /**
-    example: delete-backup -k backupTest
+    how to call from bash:
+    $ delete-backup -k backupTest
      **/
     override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(DeleteBackupAction::UserArgs)
-        run(bucketName = arguments.bucket, objectKey = arguments.key)
+        run(bucket = arguments.bucket, key = arguments.key)
+        println("${arguments.key} was deleted from ${arguments.bucket}")
     }
 }

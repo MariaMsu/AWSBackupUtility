@@ -1,5 +1,6 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.NoSuchBucket
 import aws.sdk.kotlin.services.s3.model.S3Exception
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -18,16 +19,18 @@ class ActionsTest {
     private val fileOutDir = createTempDirectory()
 
 
+    @OptIn(ExperimentalPathApi::class)
     @AfterAll
     fun deleteTestLocalData() {
         ltd.deleteAllData()
         zipFile.deleteExisting()
-        fileOutDir.deleteExisting()
+        fileOutDir.deleteRecursively()
     }
 
     @Test
     fun testActions() {
-//        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucket = bucket) }
+        // this bucket is not created yet
+        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucket = bucket) }
 
         StoreAction.run(bucket = bucket, key = s3keyFile, inDirStr = ltd.file2.toString())
         StoreAction.run(bucket = bucket, key = s3keyDir, inDirStr = ltd.baseDir.toString())
@@ -74,6 +77,10 @@ class ActionsTest {
             bucket = bucket, key = s3keyDir, outDirStr = fileOutDir.pathString, fileStr = relativePath.pathString
         )
 
-
+        // The bucket we tried to delete is not empty
+        assertThrows(S3Exception::class.java) {DeleteBucketAction.run(bucket=bucket)}
+        DeleteBackupAction.run(bucket=bucket, key=s3keyDir)
+        DeleteBackupAction.run(bucket=bucket, key=s3keyFile)
+        DeleteBucketAction.run(bucket=bucket)
     }
 }

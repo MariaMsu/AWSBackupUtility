@@ -60,7 +60,6 @@ object S3Interaction {
 
         S3Client { region = "us-east-1" }.use { s3 ->
             runBlocking { s3.deleteObjects(request) }
-            println("$objectName was deleted from $bucketName")
         }
     }
 

@@ -1,5 +1,6 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.S3Exception
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import utils.S3Interaction
@@ -14,15 +15,20 @@ object DeleteBucketAction : Action {
         ).default(Defaults.DEFAULT_BUCKET)
     }
 
-    fun run(bucketName: String) {
-        S3Interaction.deleteExistingBucket(bucketName = bucketName)
+    fun run(bucket: String) {
+        S3Interaction.deleteExistingBucket(bucketName = bucket)
     }
 
     /**
-    example: delete-bucket
+    how to call from bash:
+    $ delete-bucket
      **/
     override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(DeleteBucketAction::UserArgs)
-        run(bucketName = arguments.bucket)
+        try {
+            run(bucket = arguments.bucket)
+        }catch (e: S3Exception){
+            println(e.message)
+        }
     }
 }
