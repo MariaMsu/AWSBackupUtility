@@ -34,7 +34,6 @@ object ZipManager {
      */
     @Throws(IOException::class)
     fun unzip(zipFilePath: Path, destDirectory: Path) {
-
         if (!destDirectory.exists()) {
             destDirectory.createDirectories()
         }
@@ -50,7 +49,6 @@ object ZipManager {
                     } else {
                         // if the entry is a file, extracts it
                         filePath.parent.createDirectories()
-                        filePath.createFile()
                         extractFile(input, filePath.pathString)
                     }
                 }

@@ -1,15 +1,12 @@
 package actions
 
+import aws.sdk.kotlin.services.s3.model.S3Exception
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.default
 import utils.S3Interaction
 import utils.ZipManager
-import java.io.File
 import java.nio.file.Files
-import kotlin.io.path.Path
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.exists
-import kotlin.io.path.pathString
+import kotlin.io.path.*
 
 object RestoreFileAction : Action {
     override val name = "restore-file"
@@ -27,7 +24,7 @@ object RestoreFileAction : Action {
 
         val filePath by parser.storing(
             "-f", "--file",
-            help = "the file path in the stored directory"
+            help = "the relative file path from the stored directory root"
         )
 
         val key by parser.storing(
@@ -36,34 +33,56 @@ object RestoreFileAction : Action {
         )
     }
 
-    fun run(bucketName: String, objectKey: String, outDir: String, filePath: String) {
-        val tmpZipFile = kotlin.io.path.createTempFile()
-        S3Interaction.getObjectBytes(
-            bucketName = bucketName,
-            keyName = objectKey,
-            zipOutputFile = tmpZipFile
-        )
-        val tmpDir = createTempDirectory(prefix = "tmpDir")
-        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = tmpDir)
-        val tmpPath = Path(tmpDir.pathString, filePath)
-        val newPath = Path(outDir, filePath)
-        println(newPath.parent)
-        if (!newPath.parent.exists()) {
-            File(newPath.parent.pathString).mkdirs()   // todo fix it
+    @OptIn(ExperimentalPathApi::class)
+    fun run(bucket: String, key: String, outDirStr: String, fileStr: String) {
+        val destDir = Path(outDirStr)
+        if (destDir.exists() && destDir.listDirectoryEntries().isNotEmpty()) {
+            throw FileAlreadyExistsException(
+                file = destDir.toFile(),
+                reason = "the file ${destDir.pathString} already exist & is not empty"
+            )
         }
-        Files.move(tmpPath, newPath)
+        val tmpZipFile = createTempFile()
+        S3Interaction.getObjectBytes(bucketName = bucket, keyName = key, zipOutputFile = tmpZipFile)
+        val tmpExtractDir = createTempDirectory()
+        ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = tmpExtractDir)
+        val tmpFilePath = Path(tmpExtractDir.pathString, subpaths = arrayOf(fileStr))
+        if (!tmpFilePath.exists()) {
+            throw NoSuchFileException(
+                file = tmpFilePath.toFile(),
+                reason = "the file ${tmpFilePath.pathString} does not exist in the '${key}' backup"
+            )
+        }
+        val destFilePath = Path(outDirStr, fileStr)
+        destFilePath.parent.createDirectories()
+        Files.move(tmpFilePath, destFilePath)
+        tmpExtractDir.deleteRecursively()
     }
 
     /**
-    example: restore-file -o /home/omar/Desktop/testDirSingleFile -f gradle/wrapper/gradle-wrapper.properties -k backupTest
+    how to call from bash:
+    restore-file -o /home/omar/Desktop/testDirSingleFile -f gradle/wrapper/gradle-wrapper.properties -k backupTest
      **/
     override fun parseArgsAndCall(commandArgs: Array<String>) {
         val arguments = ArgParser(commandArgs).parseInto(RestoreFileAction::UserArgs)
-        run(
-            bucketName = arguments.bucket,
-            objectKey = arguments.key,
-            outDir = arguments.outDir,
-            filePath = arguments.filePath
-        )
+        try {
+            run(
+                bucket = arguments.bucket,
+                key = arguments.key,
+                outDirStr = arguments.outDir,
+                fileStr = arguments.filePath
+            )
+        } catch (e: S3Exception) {
+            println("The bucket with the name '${arguments.bucket}' or key '${arguments.key}' does not exist")
+            return
+        } catch (e: FileAlreadyExistsException) {
+            println(e.reason)
+            return
+        } catch (e: NoSuchFileException) {
+            println(e.reason)
+            return
+        }
+
+        println("Successfully read ${arguments.key} from ${arguments.bucket} and wrote to ${arguments.outDir}")
     }
 }

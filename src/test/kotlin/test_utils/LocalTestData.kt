@@ -47,6 +47,7 @@ class LocalTestData {
      * compare content of files in 2 folders
      */
     fun compareOriginAndOutDirs(): Boolean {
-        return Files.readAllBytes(file1).contentEquals(Files.readAllBytes(origin2outPath(file1)))
+        return Files.readAllBytes(file1).contentEquals(Files.readAllBytes(origin2outPath(file1))) &&
+                Files.readAllBytes(file2).contentEquals(Files.readAllBytes(origin2outPath(file2)))
     }
 }

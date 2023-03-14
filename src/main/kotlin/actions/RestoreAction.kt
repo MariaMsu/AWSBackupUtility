@@ -31,12 +31,15 @@ object RestoreAction : Action {
      * download a compressed file from S3 and extract it
      */
     fun run(bucket: String, key: String, outDirStr: String) {
+        val destDir = Path(outDirStr)
+        if (destDir.exists() && destDir.parent.listDirectoryEntries().isNotEmpty()) {
+            throw FileAlreadyExistsException(
+                file = destDir.toFile(),
+                reason = "the file ${destDir.pathString} already exist & is not empty"
+            )
+        }
         val tmpZipFile = createTempFile()
-        S3Interaction.getObjectBytes(
-            bucketName = bucket,
-            keyName = key,
-            zipOutputFile = tmpZipFile
-        )
+        S3Interaction.getObjectBytes(bucketName = bucket, keyName = key, zipOutputFile = tmpZipFile)
         ZipManager.unzip(zipFilePath = tmpZipFile, destDirectory = Path(outDirStr))
     }
 
@@ -50,6 +53,9 @@ object RestoreAction : Action {
             run(bucket = arguments.bucket, key = arguments.key, outDirStr = arguments.outDir)
         } catch (e: S3Exception) {
             println("The bucket with the name '${arguments.bucket}' or key '${arguments.key}' does not exist")
+            return
+        } catch (e: FileAlreadyExistsException) {
+            println(e.reason)
             return
         }
         println("Successfully read ${arguments.key} from ${arguments.bucket} and wrote to ${arguments.outDir}")

@@ -10,7 +10,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.deleteExisting
 import kotlin.io.path.pathString
 
-object StoreAction: Action {
+object StoreAction : Action {
     override val name = "store"
 
     private class UserArgs(parser: ArgParser) {
@@ -35,11 +35,9 @@ object StoreAction: Action {
      */
     fun run(bucket: String, key: String, inDirStr: String): PutObjectResponse {
         val zipFile = kotlin.io.path.createTempFile()
-        ZipManager.zipFolderIntoTmp(inputFileOrFolder = Path(inDirStr), outputZip=zipFile)
+        ZipManager.zipFolderIntoTmp(inputFileOrFolder = Path(inDirStr), outputZip = zipFile)
         val response = S3Interaction.putS3Object(
-            bucketName = bucket,
-            objectKey = key,
-            objectPath = zipFile.pathString
+            bucketName = bucket, objectKey = key, objectPath = zipFile.pathString
         )
         zipFile.deleteExisting()
         return response
