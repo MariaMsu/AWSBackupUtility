@@ -1,49 +1,41 @@
+package utils
+
+import Defaults.S3_REGION
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.*
 import aws.smithy.kotlin.runtime.content.asByteStream
 import aws.smithy.kotlin.runtime.content.writeToFile
 import kotlinx.coroutines.runBlocking
 import java.io.File
-import java.util.zip.ZipFile
+import java.nio.file.Path
 
 // based on https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/kotlin/services/s3/src/main/kotlin/com/kotlin/s3
 object S3Interaction {
 
-    fun listBucketObjects(bucketName: String) {
+    fun listBucketObjects(bucketName: String): ListObjectsResponse {
         val request = ListObjectsRequest { bucket = bucketName }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
-            val response = runBlocking { s3.listObjects(request) }
-            response.contents?.forEach { myObject ->
-                println("The name of the key is ${myObject.key}")
-                println("The object is ${calKb(myObject.size)} KBs")
-                println("The owner is ${myObject.owner}")
-            }
+        S3Client { region = S3_REGION }.use { s3 ->
+            return runBlocking { s3.listObjects(request) }
         }
     }
 
-    private fun calKb(intValue: Long): Long {
-        return intValue / 1024
-    }
-
-
-    fun getObjectBytes(bucketName: String, keyName: String, zipOutputFile: File) {
+    fun getObjectBytes(bucketName: String, keyName: String, zipOutputFile: Path) {
         val request = GetObjectRequest {
             key = keyName
             bucket = bucketName
         }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION}.use { s3 ->
             runBlocking {
                 s3.getObject(request) { resp ->
                     resp.body?.writeToFile(zipOutputFile)
-                    println("Successfully read $keyName from $bucketName")
                 }
             }
         }
     }
 
-    fun putS3Object(bucketName: String, objectKey: String, objectPath: String) {
+    fun putS3Object(bucketName: String, objectKey: String, objectPath: String): PutObjectResponse {
         createBucketIfDoesNotExist(bucketName = bucketName)
 
         val request = PutObjectRequest {
@@ -52,9 +44,9 @@ object S3Interaction {
             body = File(objectPath).asByteStream()
         }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
-            val response = runBlocking { s3.putObject(request) }
-            println("Tag information is ${response.eTag}")
+
+        S3Client { region = S3_REGION }.use { s3 ->
+            return runBlocking { s3.putObject(request) }
         }
     }
 
@@ -67,16 +59,15 @@ object S3Interaction {
             delete = delOb
         }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             runBlocking { s3.deleteObjects(request) }
-            println("$objectName was deleted from $bucketName")
         }
     }
 
     fun createNewBucket(bucketName: String) {
         val request = CreateBucketRequest { bucket = bucketName }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             runBlocking { s3.createBucket(request) }
             println("$bucketName is ready")
         }
@@ -86,8 +77,8 @@ object S3Interaction {
         val request = HeadBucketRequest { bucket = bucketName }
 
         try {
-            S3Client { region = "us-east-1" }.use { s3 ->
-                runBlocking { println(s3.headBucket(request)) }
+            S3Client { region = S3_REGION }.use { s3 ->
+                runBlocking { s3.headBucket(request) }
             }
         } catch (e: S3Exception) {
             println("A bucket with the name '$bucketName' does not yet exist")
@@ -99,9 +90,8 @@ object S3Interaction {
     fun deleteExistingBucket(bucketName: String?) {
         val request = DeleteBucketRequest { bucket = bucketName }
 
-        S3Client { region = "us-east-1" }.use { s3 ->
+        S3Client { region = S3_REGION }.use { s3 ->
             runBlocking { s3.deleteBucket(request) }
-            println("The $bucketName was successfully deleted")
         }
     }
 }
