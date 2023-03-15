@@ -10,6 +10,7 @@ import java.io.File
 import java.nio.file.Path
 
 // based on https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/kotlin/services/s3/src/main/kotlin/com/kotlin/s3
+// API documentation is here https://sdk.amazonaws.com/kotlin/api/latest/s3/aws.sdk.kotlin.services.s3/index.html
 object S3Interaction {
 
     fun listBucketObjects(bucketName: String): ListObjectsResponse {
