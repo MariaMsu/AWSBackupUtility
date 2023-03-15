@@ -10,20 +10,27 @@ export AWS_ACCESS_KEY_ID=your_access_key_id
 export AWS_SECRET_ACCESS_KEY=your_secret_access_key
 ```
 
-### How to build:
+### How to build
 ```shell
-gradle build 
+./gradlew build 
 ```
 
-### How to test:
+### How to test
 ```shell
-gradle test -i
+./gradlew test --info
 ```
 Occasionally the [ActionsTest.kt](src%2Ftest%2Fkotlin%2Factions%2FActionsTest.kt) may fail 
 because of the network issues. 
 
 ### How to use, quick example
-In this example we create and store the following folder:
+(optional) Build and run a docker container to use it as a sandbox.
+You can test the AWS Backup Utility inside this docker container.
+```shell
+docker build --build-arg key_id=${AWS_ACCESS_KEY_ID} --build-arg key=${AWS_SECRET_ACCESS_KEY} -t aws-util:02 .
+docker run -it aws-util:02
+```
+
+In this example we create the following folders structure and store 'dir'
 ```
 testUtility321
 └── dir
@@ -56,7 +63,7 @@ rm -rf ./testUtility321/
 
 
 ### How to use, the whole guide
-The AWS Backup Utility can be run as a gradle project `gradle run --args="<command> <command_arguments>"` 
+The AWS Backup Utility can be run as a gradle project `./gradlew run --args="<command> <command_arguments>"` 
 or as a fat jar `java -jar ./build/libs/AWSBackupUtility-1.0.0.jar <command> <command_arguments>`.
 The following examples are provided for a fat jar.
 

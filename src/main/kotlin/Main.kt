@@ -18,38 +18,32 @@ Where:
     Available commands are: ${command2action.keys.joinToString(", ")}
 """
 
-
 /**
-Before running this Kotlin code example, set up your development environment,
-including your credentials.
-For more information, see the following documentation topic:
-https://docs.aws.amazon.com/sdk-for-kotlin/latest/developer-guide/setup.html
+ * read the arguments from the console and call corresponding commands
  */
 fun main(args: Array<String>) {
-//    var envVar: String = System.getenv("AWS_ACCESS_KEY_ID")
-//    println("envVar: ${envVar}")
-
     if (args.isEmpty()) {
         println(usage)
         exitProcess(-1)
     }
 
+    // split args into <command> and <commandArgs>
     val command = args[0]
     val commandArgs = args.drop(1).toTypedArray()
+
     val action = command2action[command]
-    if (action != null) {
-        try {
-            if (action.parseArgsAndCall(commandArgs)) {
-                exitProcess(0)
-            } else {
-                exitProcess(-1)
-            }
-        } catch (e: Exception) {
-            println(e.message)
+    if (action == null) {
+        println(usage)
+        exitProcess(-1)
+    }
+    try {
+        if (action.parseArgsAndCall(commandArgs)) {
+            exitProcess(0)
+        } else {
             exitProcess(-1)
         }
-    } else {
-        println(usage)
+    } catch (e: Exception) {
+        println(e.message)
         exitProcess(-1)
     }
 }
