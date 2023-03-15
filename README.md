@@ -1,4 +1,8 @@
 # AWS Backup Utility
+AWS Backup Utility copies files to AWS S3.  
+The utility takes a local directory with files and put it into AWS S3 in the form of one blob file.
+The user is able to specify what backup he wants to restore and where it should put the files on the local system.
+The utility can also restore one individual file from a backup.
 
 ### How to set credentials
 Set the default credentials before running the utility
@@ -22,15 +26,15 @@ export AWS_SECRET_ACCESS_KEY=your_secret_access_key
 Occasionally the [ActionsTest.kt](src%2Ftest%2Fkotlin%2Factions%2FActionsTest.kt) may fail 
 because of the network issues. 
 
-### How to use, quick example
+### How to use, a quick example
 (optional) Build and run a docker container to use it as a sandbox.
 You can test the AWS Backup Utility inside this docker container.
 ```shell
-docker build --build-arg key_id=${AWS_ACCESS_KEY_ID} --build-arg key=${AWS_SECRET_ACCESS_KEY} -t aws-util:02 .
-docker run -it aws-util:02
+docker build --build-arg key_id=${AWS_ACCESS_KEY_ID} --build-arg key=${AWS_SECRET_ACCESS_KEY} -t aws-util:04 .
+docker run -it aws-util:04
 ```
 
-In this example we create the following folders structure and store 'dir'
+In this example we create the following folders structure and store 'dir' in AWS S3
 ```
 testUtility321
 └── dir
@@ -65,7 +69,7 @@ rm -rf ./testUtility321/
 ### How to use, the whole guide
 The AWS Backup Utility can be run as a gradle project `./gradlew run --args="<command> <command_arguments>"` 
 or as a fat jar `java -jar ./build/libs/AWSBackupUtility-1.0.0.jar <command> <command_arguments>`.
-The following examples are provided for a fat jar.
+The following examples are provided for the fat jar.
 
 Backup a directory:
 ```shell
