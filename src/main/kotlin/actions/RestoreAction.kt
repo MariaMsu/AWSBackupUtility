@@ -35,7 +35,7 @@ object RestoreAction : Action {
         if (destDir.exists() && destDir.parent.listDirectoryEntries().isNotEmpty()) {
             throw FileAlreadyExistsException(
                 file = destDir.toFile(),
-                reason = "the file ${destDir.pathString} already exist & is not empty"
+                reason = "The file ${destDir.pathString} already exist & is not empty"
             )
         }
         val tmpZipFile = createTempFile()

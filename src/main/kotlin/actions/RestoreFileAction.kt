@@ -42,7 +42,7 @@ object RestoreFileAction : Action {
         if (destDir.exists() && destDir.listDirectoryEntries().isNotEmpty()) {
             throw FileAlreadyExistsException(
                 file = destDir.toFile(),
-                reason = "the file ${destDir.pathString} already exist & is not empty"
+                reason = "The file ${destDir.pathString} already exist & is not empty"
             )
         }
         val tmpZipFile = createTempFile()
@@ -53,7 +53,7 @@ object RestoreFileAction : Action {
         if (!tmpFilePath.exists()) {
             throw NoSuchFileException(
                 file = tmpFilePath.toFile(),
-                reason = "the file ${tmpFilePath.pathString} does not exist in the '${key}' backup"
+                reason = "The file ${tmpFilePath.pathString} does not exist in the '${key}' backup"
             )
         }
         val destFilePath = Path(outDirStr, fileStr)
