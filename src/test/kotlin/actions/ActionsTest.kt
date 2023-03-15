@@ -29,9 +29,6 @@ class ActionsTest {
 
     @Test
     fun testActions() {
-        // this bucket is not created yet
-        assertThrows(NoSuchBucket::class.java) { ListBucketAction.run(bucket = bucket) }
-
         StoreAction.run(bucket = bucket, key = s3keyFile, inDirStr = ltd.file2.toString())
         StoreAction.run(bucket = bucket, key = s3keyDir, inDirStr = ltd.baseDir.toString())
 

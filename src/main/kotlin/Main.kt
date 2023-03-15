@@ -13,7 +13,7 @@ val command2action = mapOf<String, Action>(
 
 val usage = """
 Usage:
-    <command> <command arguments>
+    <command> <command_arguments>
 Where:
     Available commands are: ${command2action.keys.joinToString(", ")}
 """
@@ -26,6 +26,9 @@ For more information, see the following documentation topic:
 https://docs.aws.amazon.com/sdk-for-kotlin/latest/developer-guide/setup.html
  */
 fun main(args: Array<String>) {
+//    var envVar: String = System.getenv("AWS_ACCESS_KEY_ID")
+//    println("envVar: ${envVar}")
+
     if (args.isEmpty()) {
         println(usage)
         exitProcess(-1)

@@ -23,7 +23,7 @@ object RestoreAction : Action {
 
         val key by parser.storing(
             "-k", "--key",
-            help = "name of the backup file in the S3 bucket"
+            help = "the backup key (i.e. file name) in the S3 bucket"
         )
     }
 

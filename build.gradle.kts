@@ -1,5 +1,3 @@
-import org.gradle.model.internal.core.ModelNodes.withType
-
 plugins {
     kotlin("jvm") version "1.8.0"
     application
@@ -13,13 +11,10 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
-
     implementation("aws.sdk.kotlin:s3:0.19.0-beta")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-//    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.0")
 
     implementation("org.slf4j:slf4j-api:2.0.5")
     implementation("org.slf4j:slf4j-simple:2.0.5")
@@ -41,11 +36,11 @@ application {
 }
 
 tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "MainKt"
-    }
-    configurations["compileClasspath"].forEach { file: File ->
-        from(zipTree(file.absoluteFile))
-    }
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    manifest.attributes["Main-Class"] = "MainKt"
+    val dependencies = configurations
+        .runtimeClasspath
+        .get()
+        .map(::zipTree) // OR .map { zipTree(it) }
+    from(dependencies)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
