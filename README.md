@@ -23,8 +23,8 @@ export AWS_SECRET_ACCESS_KEY=your_secret_access_key
 ```shell
 ./gradlew test --info
 ```
-Occasionally the [ActionsTest.kt](src%2Ftest%2Fkotlin%2Factions%2FActionsTest.kt) may fail 
-because of the network issues. 
+Rarely the [ActionsTest.kt](src%2Ftest%2Fkotlin%2Factions%2FActionsTest.kt), assuming interaction with AWS, 
+may fail because of network issues. So it may need to run this test twice.
 
 ### How to use, a quick example
 (optional) Build and run a docker container to use it as a sandbox.
